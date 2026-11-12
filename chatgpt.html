@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chatgpt — AI Chat Demo</title>
+<style>
+:root{--bg:#212121;--panel:#171717;--text:#f4f4f4;--muted:#a3a3a3;--line:#353535;--accent:#10a37f;--bubble:#303030}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;height:100vh;overflow:hidden}
+.app{height:100vh;display:flex}.sidebar{width:260px;background:var(--panel);padding:14px;display:flex;flex-direction:column;gap:12px;transition:transform .2s}
+.brand{display:flex;align-items:center;gap:10px;font-size:18px;font-weight:700;padding:8px 6px}.logo{width:30px;height:30px;border-radius:10px;background:var(--accent);display:grid;place-items:center;font-weight:900;color:#062b22}
+.new-chat,.side-item{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:11px 12px;text-align:left;cursor:pointer;font:inherit}.new-chat:hover,.side-item:hover{background:#2b2b2b}.section-label{color:var(--muted);font-size:12px;padding:8px 5px 0}.history{display:flex;flex-direction:column;gap:4px;overflow:auto}.history button{border:0;background:transparent;color:#ddd;text-align:left;padding:9px;border-radius:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}.history button:hover{background:#2a2a2a}.profile{margin-top:auto;border-top:1px solid var(--line);padding:14px 4px 4px;display:flex;gap:10px;align-items:center}.avatar{width:32px;height:32px;background:#555;border-radius:50%;display:grid;place-items:center}.profile small{display:block;color:var(--muted)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}.topbar{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;border-bottom:1px solid rgba(255,255,255,.04)}.topbar strong{font-size:15px}.top-actions{display:flex;gap:8px}.icon-btn{background:transparent;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:7px 10px;cursor:pointer}
+.content{flex:1;overflow:auto;display:flex;flex-direction:column;align-items:center;padding:28px 20px 18px}.welcome{width:min(760px,100%);margin:auto 0;display:flex;flex-direction:column;align-items:center;text-align:center;padding-bottom:8vh}.welcome h1{font-size:clamp(28px,4vw,40px);letter-spacing:-1.3px;margin:0 0 8px}.welcome p{color:var(--muted);margin:0 0 28px}.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;width:min(650px,100%)}.suggestion{background:transparent;border:1px solid var(--line);color:var(--text);padding:14px;text-align:left;border-radius:14px;cursor:pointer}.suggestion:hover{background:#2b2b2b}.suggestion b{display:block;margin-bottom:3px}.suggestion span{font-size:13px;color:var(--muted)}
+.messages{width:min(760px,100%);display:flex;flex-direction:column;gap:22px;margin:0 auto}.message{display:flex;gap:13px;align-items:flex-start}.message .avatar{flex-shrink:0}.message-body{padding-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}.message.user{justify-content:flex-end}.message.user .message-body{background:var(--bubble);padding:11px 15px;border-radius:18px;max-width:80%}.message.user .avatar{display:none}.ai-mark{background:var(--accent);color:#05291f;font-weight:900}
+.composer-wrap{padding:10px 20px 16px;display:flex;flex-direction:column;align-items:center}.composer{width:min(760px,100%);display:flex;gap:10px;align-items:flex-end;border:1px solid #4a4a4a;background:#2f2f2f;padding:10px 11px;border-radius:24px;box-shadow:0 8px 35px #0002}.composer textarea{flex:1;resize:none;max-height:160px;min-height:28px;background:transparent;border:0;outline:0;color:var(--text);font:inherit;padding:4px 3px}.send{border:0;background:var(--text);color:#171717;border-radius:50%;width:34px;height:34px;font-size:19px;font-weight:700;cursor:pointer}.send:disabled{opacity:.35;cursor:default}.disclaimer{font-size:11px;color:var(--muted);margin-top:9px;text-align:center}.typing{color:var(--muted);font-size:13px}
+@media(max-width:700px){.sidebar{position:fixed;z-index:5;inset:0 auto 0 0;transform:translateX(-100%);box-shadow:15px 0 40px #0005}.sidebar.open{transform:translateX(0)}.topbar{padding:0 13px}.content{padding:20px 14px}.composer-wrap{padding:8px 12px 12px}.suggestions{grid-template-columns:1fr}.welcome{padding-bottom:4vh}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span class="logo">✳</span> Chatgpt</div>
+  <button class="new-chat" id="newChat">＋ &nbsp; New chat</button>
+  <div class="section-label">RECENT</div>
+  <div class="history" id="history"></div>
+  <div class="profile"><div class="avatar">Y</div><div>Guest User<small>Sample website</small></div></div>
+</aside>
+<main class="main">
+  <header class="topbar"><div class="top-actions"><button class="icon-btn" id="menuBtn" aria-label="Open menu">☰</button><strong>ChatNova <span style="color:var(--muted);font-weight:400">Demo</span></strong></div><div class="top-actions"><button class="icon-btn" id="themeBtn">☼ Theme</button><button class="icon-btn" id="clearBtn">Clear</button></div></header>
+  <section class="content" id="content">
+    <div class="welcome" id="welcome">
+      <h1>What can I help with?</h1><p>Your friendly AI chat interface sample.</p>
+      <div class="suggestions">
+        <button class="suggestion" data-prompt="Give me a simple plan to learn web development."><b>💻 Learn web development</b><span>Make a beginner-friendly learning plan</span></button>
+        <button class="suggestion" data-prompt="Help me write a professional self introduction for an interview."><b>📝 Prepare for an interview</b><span>Practice a clear, confident introduction</span></button>
+        <button class="suggestion" data-prompt="Explain JavaScript in simple words with an example."><b>⚡ Explain a topic</b><span>Get a simple explanation and example</span></button>
+        <button class="suggestion" data-prompt="Suggest a creative small website project I can build."><b>🚀 Build a project</b><span>Find a project idea to try</span></button>
+      </div>
+    </div>
+    <div class="messages" id="messages"></div>
+  </section>
+  <footer class="composer-wrap">
+    <form class="composer" id="chatForm"><textarea id="prompt" rows="1" placeholder="Message ChatNova..." aria-label="Message ChatNova"></textarea><button class="send" id="sendBtn" type="submit" aria-label="Send message" disabled>↑</button></form>
+    <div class="disclaimer">ChatNova is a sample interface. Replies are demo-generated, not official ChatGPT responses.</div>
+  </footer>
+</main>
+</div>
+<script>
+const $=s=>document.querySelector(s), promptBox=$('#prompt'), messages=$('#messages'), welcome=$('#welcome'), historyBox=$('#history');
+let chats=[], current=[];
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderMessage(role,text){const row=document.createElement('div');row.className='message '+(role==='user'?'user':'assistant');row.innerHTML=(role==='assistant'?'<div class="avatar ai-mark">✳</div>':'')+'<div class="message-body"></div>'+(role==='user'?'<div class="avatar">Y</div>':'');row.querySelector('.message-body').textContent=text;messages.appendChild(row);$('#content').scrollTop=$('#content').scrollHeight;}
+function demoReply(q){
+ const t=q.toLowerCase();
+ if(t.includes('javascript')) return 'JavaScript makes websites interactive. For example, a button can respond when someone clicks it.\\n\\nExample:\\nconst button = document.querySelector(\"button\");\\nbutton.addEventListener(\"click\", () => alert(\"Hello!\"));';
+ if(t.includes('interview')||t.includes('introduction')) return 'Here is a simple structure for your interview introduction:\\n\\n1. Greet the interviewer.\\n2. Share your name and education.\\n3. Mention your skills and a project.\\n4. Explain the role you are looking for.\\n5. Thank the interviewer.\\n\\nKeep it natural and around 45–60 seconds.';
+ if(t.includes('web development')||t.includes('learn web')) return 'A beginner-friendly plan:\\n\\n1. HTML — page structure.\\n2. CSS — layout, colors and responsive design.\\n3. JavaScript — interactions and logic.\\n4. Build 2–3 small projects.\\n5. Learn Git and publish a project online.\\n\\nPractice a little every day and keep your projects in one folder.';
+ if(t.includes('project')) return 'Try building a personal portfolio website with a home page, About section, project cards, contact form and mobile-friendly navigation. Start with HTML and CSS, then add JavaScript for the menu and form validation.';
+ return 'Thanks for your message! This is a front-end demo, so it creates sample replies rather than connecting to a real AI model. To enable real AI answers, connect a secure backend to an AI API and keep the API key on the server—not in browser JavaScript.\\n\\nYou asked: “'+q+'”\\n\\nFor this demo, try asking about JavaScript, interview preparation, web development, or project ideas.';
+}
+function saveChat(){if(current.length){const title=current.find(x=>x.role==='user')?.text||'New chat';chats.unshift({title:title.slice(0,32),items:[...current]});chats=chats.slice(0,12);renderHistory();}}
+function renderHistory(){historyBox.innerHTML='';chats.forEach((c,i)=>{const b=document.createElement('button');b.textContent=c.title;b.onclick=()=>{current=[...c.items];messages.innerHTML='';welcome.style.display='none';current.forEach(m=>renderMessage(m.role,m.text));if(innerWidth<=700)$('#sidebar').classList.remove('open');};historyBox.appendChild(b);});}
+function newChat(){saveChat();current=[];messages.innerHTML='';welcome.style.display='flex';promptBox.value='';$('#sendBtn').disabled=true;$('#sidebar').classList.remove('open');}
+function send(q){q=q.trim();if(!q)return;welcome.style.display='none';renderMessage('user',q);current.push({role:'user',text:q});promptBox.value='';promptBox.style.height='auto';$('#sendBtn').disabled=true;const wait=document.createElement('div');wait.className='typing';wait.textContent='ChatNova is thinking…';messages.appendChild(wait);$('#content').scrollTop=$('#content').scrollHeight;setTimeout(()=>{wait.remove();const answer=demoReply(q);renderMessage('assistant',answer);current.push({role:'assistant',text:answer});renderHistory();},450);}
+$('#chatForm').addEventListener('submit',e=>{e.preventDefault();send(promptBox.value);});
+promptBox.addEventListener('input',()=>{$('#sendBtn').disabled=!promptBox.value.trim();promptBox.style.height='auto';promptBox.style.height=Math.min(promptBox.scrollHeight,160)+'px';});
+promptBox.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('#chatForm').requestSubmit();}});
+document.querySelectorAll('[data-prompt]').forEach(b=>b.addEventListener('click',()=>send(b.dataset.prompt)));
+$('#newChat').onclick=newChat;$('#clearBtn').onclick=()=>{current=[];messages.innerHTML='';welcome.style.display='flex';};$('#menuBtn').onclick=()=>$('#sidebar').classList.toggle('open');
+$('#themeBtn').onclick=()=>{const light=document.body.dataset.theme!=='light';document.body.dataset.theme=light?'light':'dark';if(light){document.documentElement.style.setProperty('--bg','#f7f7f8');document.documentElement.style.setProperty('--panel','#ededed');document.documentElement.style.setProperty('--text','#202020');document.documentElement.style.setProperty('--muted','#666');document.documentElement.style.setProperty('--line','#d2d2d2');document.documentElement.style.setProperty('--bubble','#e5e5e5');}else{['--bg','--panel','--text','--muted','--line','--bubble'].forEach((v,i)=>document.documentElement.style.removeProperty(v));}};
+</script>
+</body>
+</html>
